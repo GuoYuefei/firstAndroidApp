@@ -42,8 +42,9 @@ public class MainActivity extends AppCompatActivity {
     private String content = "";        //接收的信息
     private String key = "";
     private String value = "";
+    private String flag = "";           //解析出这是第几个检测点
 
-    private int num = 0;                //接收到第几次的
+
 
 
     @Override
@@ -67,6 +68,23 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
+     * 判定是哪个检测点的数据
+     */
+    private void where(TextView[] tvs){
+        switch (key){
+            case "illum":
+                tvs[0].setText(value+"lx");break;
+            case "temperature":
+                tvs[1].setText(value+"℃");break;
+            case "humidity":
+                tvs[2].setText(value+"%RH");break;
+            case "soild":
+                tvs[3].setText(value+"%RH");break;
+        }
+    }
+
+
+    /**
      * 非主线程不能操作ui，所以需要使用Handler进行通讯。让通讯线程告诉UI线程需要改变UI界面了
      */
     private final Handler myHandler = new Handler(){
@@ -75,19 +93,34 @@ public class MainActivity extends AppCompatActivity {
             if(msg.what == 0x123){
                 Log.d("debug","test handler");
 
-                TextView tvWenDu = (TextView) findViewById(R.id.textView);
-                TextView tvShiDu = (TextView) findViewById(R.id.textView10);
-                TextView tvGuang = (TextView) findViewById(R.id.illum1);
-                TextView tv = (TextView) findViewById(R.id.textView11);
-                switch (key){
-                    case "illum":
-                        tvGuang.setText(value+"lx");break;
-                    case "temperature":
-                        tvWenDu.setText(value+"°C");break;
-                    case "humidity":
-                        tvShiDu.setText(value+"%RH");break;
+                TextView tvGuang1 = (TextView) findViewById(R.id.illum11);
+                TextView tvWenDu1 = (TextView) findViewById(R.id.wen11);
+                TextView tvShiDu1 = (TextView) findViewById(R.id.shi11);
+                TextView tvTu1 = (TextView) findViewById(R.id.tu11);
+
+                TextView tvGuang2 = (TextView) findViewById(R.id.illum21);
+                TextView tvWenDu2 = (TextView) findViewById(R.id.wen21);
+                TextView tvShiDu2 = (TextView) findViewById(R.id.shi21);
+                TextView tvTu2 = (TextView) findViewById(R.id.tu21);
+
+                TextView tvGuang3 = (TextView) findViewById(R.id.illum31);
+                TextView tvWenDu3 = (TextView) findViewById(R.id.wen31);
+                TextView tvShiDu3 = (TextView) findViewById(R.id.shi31);
+                TextView tvTu3 = (TextView) findViewById(R.id.tu31);
+
+                TextView tv = (TextView) findViewById(R.id.textView);
+
+                TextView[][] tvs = {{tvGuang1,tvWenDu1,tvShiDu1,tvTu1},{tvGuang2,tvWenDu2,tvShiDu2,tvTu2},{tvGuang3,tvWenDu3,tvShiDu3,tvTu3}};
+                tv.setText(content);
+                content = null;                 //content清空
+                switch (flag){
+                    case "1":
+                        where(tvs[0]);break;
+                    case "2":
+                        where(tvs[1]);break;
+                    case "3":
+                        where(tvs[2]);break;
                 }
-                tv.setText(String.valueOf(key.length()));
             }
         }
     };
@@ -100,10 +133,16 @@ public class MainActivity extends AppCompatActivity {
      * humidity:112%
      */
     private void parseInfo(){
-        int i = content.indexOf(":");
-        char[] temp1 = new char[14];
-        char[] temp2 = new char[10];
-        content.getChars(0,i,temp1,0);
+        int i = content.lastIndexOf(":");
+        int j = content.indexOf("@");
+        char[] temp0 = new char[5];
+        char[] temp1 = new char[16];
+        char[] temp2 = new char[4];
+
+        content.getChars(0,j,temp0,0);
+        flag = String.valueOf(temp0);
+        flag = flag.trim();
+        content.getChars(j+1,i,temp1,0);
         key = String.valueOf(temp1);
         key = key.trim();
         content.getChars(i+1,content.length(),temp2,0);
